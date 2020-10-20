@@ -85,6 +85,7 @@
             this.cmbLanguage.Items.Add(ribbonDropDownItemImpl2);
             this.cmbLanguage.Label = "Language";
             this.cmbLanguage.Name = "cmbLanguage";
+            this.cmbLanguage.Text = null;
             // 
             // Ribbon
             // 
