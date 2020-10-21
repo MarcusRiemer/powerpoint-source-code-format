@@ -12,24 +12,53 @@ namespace pp_source_format
 {
     public static class Formatter
     {
-        public static void FormatShape(Shape s)
+        public static void FormatShape(Shape s, string language, string style)
         {
             var sourceText = s.TextFrame.TextRange.Text;
-            var formattedText = RunPygments(sourceText);
+            var fontName = GuessSensibleFont(s.TextFrame.TextRange);
+
+            var formattedText = RunPygments(sourceText, language, style);
+            Clipboard.SetData(DataFormats.Text, formattedText);
             Clipboard.SetData(DataFormats.Rtf, formattedText);
             s.TextFrame.TextRange.PasteSpecial(PpPasteDataType.ppPasteRTF);
+
+            // Pasting has removed the font
+            s.TextFrame.TextRange.Font.Name = fontName;
         }
 
-        private static string RunPygments(string input)
+        private static string GuessSensibleFont(TextRange t)
         {
+            if (!String.IsNullOrEmpty(t.Font.Name))
+            {
+                return t.Font.Name;
+            }
+
+            foreach (TextRange c in t.Characters())
+            {
+                if (!String.IsNullOrEmpty(c.Font.Name)) {
+                    return c.Font.Name;
+                }
+            }
+
+            return "Consolas";
+        }
+
+        private static string RunPygments(string input, string language, string style)
+        {
+            var arguments = String.Format("-f rtf -l \"{0}\" -O \"style={1}\"", language, style);
+            if (false )
+            {
+                arguments += "-o \"C:/Users/Marcus Riemer/source/repos/MarcusRiemer/powerpoint-source-code-format/pp-source-format/test.rtf\"";
+            }
             var startInfo = new ProcessStartInfo()
             {
                 FileName = FindPygmentizePath(),
-                Arguments = "-f rtf -l java",
+                Arguments = arguments,
                 UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
+                CreateNoWindow = true,
             };
 
             Process p = new Process()
@@ -44,11 +73,21 @@ namespace pp_source_format
             p.WaitForExit();
 
             var result = p.StandardOutput.ReadToEnd();
+            var error = p.StandardError.ReadToEnd();
 
+            if (!String.IsNullOrWhiteSpace(error))
+            {
+                throw new Exception(String.Format("Error running pygmentize with arguments {0}:\n{1}", arguments, error));
+            } 
             return result;
         }
 
         public static string FindPygmentizePath()
+        {
+            return FindExePath("pygmentize.exe");
+        }
+
+        private static string FindPygmentizeFromPythonPath()
         {
             var pythonExe = FindExePath("python.exe");
             var pythonDir = Path.GetDirectoryName(pythonExe);
@@ -69,7 +108,7 @@ namespace pp_source_format
         /// <param name="exe">The name of the executable file</param>
         /// <returns>The fully-qualified path to the file</returns>
         /// <exception cref="System.IO.FileNotFoundException">Raised when the exe was not found</exception>
-        public static string FindExePath(string exe)
+        private static string FindExePath(string exe)
         {
             exe = Environment.ExpandEnvironmentVariables(exe);
             if (!File.Exists(exe))

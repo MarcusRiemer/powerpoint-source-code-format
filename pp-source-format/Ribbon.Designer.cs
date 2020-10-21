@@ -36,11 +36,17 @@
         {
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl1 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl2 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl3 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl4 = this.Factory.CreateRibbonDropDownItem();
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
+            this.lblPygmentsAvailable = this.Factory.CreateRibbonLabel();
+            this.lblPygmentsNotAvailable = this.Factory.CreateRibbonLabel();
+            this.cmbLanguage = this.Factory.CreateRibbonComboBox();
+            this.btnHelpPygmentize = this.Factory.CreateRibbonButton();
             this.btnFormatCurrent = this.Factory.CreateRibbonButton();
             this.btnFormatAll = this.Factory.CreateRibbonButton();
-            this.cmbLanguage = this.Factory.CreateRibbonComboBox();
+            this.cmbStyle = this.Factory.CreateRibbonComboBox();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.SuspendLayout();
@@ -54,28 +60,27 @@
             // 
             // group1
             // 
+            this.group1.Items.Add(this.lblPygmentsAvailable);
+            this.group1.Items.Add(this.lblPygmentsNotAvailable);
+            this.group1.Items.Add(this.btnHelpPygmentize);
+            this.group1.Items.Add(this.cmbLanguage);
+            this.group1.Items.Add(this.cmbStyle);
             this.group1.Items.Add(this.btnFormatCurrent);
             this.group1.Items.Add(this.btnFormatAll);
-            this.group1.Items.Add(this.cmbLanguage);
             this.group1.Label = "PP Source Code";
             this.group1.Name = "group1";
             // 
-            // btnFormatCurrent
+            // lblPygmentsAvailable
             // 
-            this.btnFormatCurrent.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.btnFormatCurrent.Image = global::pp_source_format.Properties.Resources.single_target;
-            this.btnFormatCurrent.Label = "Format Current";
-            this.btnFormatCurrent.Name = "btnFormatCurrent";
-            this.btnFormatCurrent.ShowImage = true;
-            this.btnFormatCurrent.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.OnRenameSingle);
+            this.lblPygmentsAvailable.Label = "✓ Pygments is available";
+            this.lblPygmentsAvailable.Name = "lblPygmentsAvailable";
+            this.lblPygmentsAvailable.Visible = false;
             // 
-            // btnFormatAll
+            // lblPygmentsNotAvailable
             // 
-            this.btnFormatAll.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.btnFormatAll.Image = global::pp_source_format.Properties.Resources.multiple_targets;
-            this.btnFormatAll.Label = "Format All";
-            this.btnFormatAll.Name = "btnFormatAll";
-            this.btnFormatAll.ShowImage = true;
+            this.lblPygmentsNotAvailable.Label = "❌ Pygments is not available";
+            this.lblPygmentsNotAvailable.Name = "lblPygmentsNotAvailable";
+            this.lblPygmentsNotAvailable.Visible = false;
             // 
             // cmbLanguage
             // 
@@ -85,7 +90,40 @@
             this.cmbLanguage.Items.Add(ribbonDropDownItemImpl2);
             this.cmbLanguage.Label = "Language";
             this.cmbLanguage.Name = "cmbLanguage";
-            this.cmbLanguage.Text = null;
+            this.cmbLanguage.Text = "java";
+            // 
+            // btnHelpPygmentize
+            // 
+            this.btnHelpPygmentize.Label = "Show Online Help";
+            this.btnHelpPygmentize.Name = "btnHelpPygmentize";
+            // 
+            // btnFormatCurrent
+            // 
+            this.btnFormatCurrent.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.btnFormatCurrent.Image = global::pp_source_format.Properties.Resources.single_target;
+            this.btnFormatCurrent.Label = "Format Selected";
+            this.btnFormatCurrent.Name = "btnFormatCurrent";
+            this.btnFormatCurrent.ShowImage = true;
+            this.btnFormatCurrent.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.OnRenameSelected);
+            // 
+            // btnFormatAll
+            // 
+            this.btnFormatAll.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.btnFormatAll.Image = global::pp_source_format.Properties.Resources.multiple_targets;
+            this.btnFormatAll.Label = "Format All";
+            this.btnFormatAll.Name = "btnFormatAll";
+            this.btnFormatAll.ShowImage = true;
+            this.btnFormatAll.Visible = false;
+            // 
+            // cmbStyle
+            // 
+            ribbonDropDownItemImpl3.Label = "default";
+            ribbonDropDownItemImpl4.Label = "vs";
+            this.cmbStyle.Items.Add(ribbonDropDownItemImpl3);
+            this.cmbStyle.Items.Add(ribbonDropDownItemImpl4);
+            this.cmbStyle.Label = "Style";
+            this.cmbStyle.Name = "cmbStyle";
+            this.cmbStyle.Text = "default";
             // 
             // Ribbon
             // 
@@ -108,6 +146,10 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnFormatCurrent;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnFormatAll;
         internal Microsoft.Office.Tools.Ribbon.RibbonComboBox cmbLanguage;
+        internal Microsoft.Office.Tools.Ribbon.RibbonLabel lblPygmentsAvailable;
+        internal Microsoft.Office.Tools.Ribbon.RibbonLabel lblPygmentsNotAvailable;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnHelpPygmentize;
+        internal Microsoft.Office.Tools.Ribbon.RibbonComboBox cmbStyle;
     }
 
     partial class ThisRibbonCollection

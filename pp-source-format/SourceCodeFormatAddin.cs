@@ -9,7 +9,7 @@ using Microsoft.Office.Interop.PowerPoint;
 
 namespace pp_source_format
 {
-    public partial class ThisAddIn
+    public partial class SourceCodeFormatAddin
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {

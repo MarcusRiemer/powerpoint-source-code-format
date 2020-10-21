@@ -11,17 +11,55 @@ namespace pp_source_format
     {
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
-
+            CheckPygmentizeStatus();
         }
 
-        private void OnRenameSingle(object sender, RibbonControlEventArgs e)
+        private void CheckPygmentizeStatus()
+        {
+            try
+            {
+                var PygmentizePath = Formatter.FindPygmentizePath();
+                lblPygmentsAvailable.SuperTip = PygmentizePath;
+                
+                foreach (var c in InActivePygmentizeControls)
+                {
+                    c.Visible = false;
+                }
+
+                foreach (var c in ActivePygmentizeControls)
+                {
+                    c.Enabled = true;
+                }
+
+                lblPygmentsAvailable.Visible = true;
+                lblPygmentsNotAvailable.Visible = false;
+            }
+            catch (Exception ex)
+            {
+                foreach (var c in InActivePygmentizeControls)
+                {
+                    c.Visible = true;
+                }
+
+                foreach (var c in ActivePygmentizeControls)
+                {
+                    c.Enabled = false;
+                }
+
+
+                lblPygmentsAvailable.Visible = false;
+                lblPygmentsNotAvailable.Visible = true;
+            }
+        }
+
+        private void OnRenameSelected(object sender, RibbonControlEventArgs e)
         {
             try
             {
                 var selectedShapes = ActiveWindow.Selection.ShapeRange;
                 foreach (Shape shape in selectedShapes)
                 {
-                    Formatter.FormatShape(shape);
+                    Formatter.FormatShape(shape, cmbLanguage.Text, cmbStyle.Text);
                 }
             }
             catch (Exception ex)
@@ -32,7 +70,7 @@ namespace pp_source_format
 
         private Application Application
         {
-            get => Globals.ThisAddIn.Application;
+            get => Globals.SourceCodeFormatAddin.Application;
         }
 
         private Presentation ActivePresentation
@@ -43,6 +81,16 @@ namespace pp_source_format
         private DocumentWindow ActiveWindow
         {
             get => Application.ActiveWindow;
+        }
+
+        private IEnumerable<RibbonControl> ActivePygmentizeControls
+        {
+            get => new RibbonControl[] { lblPygmentsAvailable, btnFormatAll, btnFormatCurrent, cmbLanguage, };
+        }
+
+        private IEnumerable<RibbonControl> InActivePygmentizeControls
+        {
+            get => new RibbonControl[] { lblPygmentsNotAvailable, btnHelpPygmentize };
         }
     }
 }
