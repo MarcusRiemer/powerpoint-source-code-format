@@ -104,7 +104,7 @@
             this.btnFormatCurrent.Label = "Format Selected";
             this.btnFormatCurrent.Name = "btnFormatCurrent";
             this.btnFormatCurrent.ShowImage = true;
-            this.btnFormatCurrent.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.OnRenameSelected);
+            this.btnFormatCurrent.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.OnFormatSelected);
             // 
             // btnFormatAll
             // 

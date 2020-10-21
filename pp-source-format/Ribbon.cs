@@ -11,14 +11,21 @@ namespace pp_source_format
     {
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
-            CheckPygmentizeStatus();
+            ReflectPygmentizeStatus();
         }
 
-        private void CheckPygmentizeStatus()
+        /// <summary>
+        /// As it is not exactly straightforwad to get hold of pygmentize the UI
+        /// tries to give at least a little feedback.
+        /// </summary>
+        private void ReflectPygmentizeStatus()
         {
             try
             {
+                // This will throw if pygmentize is not available
                 var PygmentizePath = Formatter.FindPygmentizePath();
+
+                // So here we are on the success path
                 lblPygmentsAvailable.SuperTip = PygmentizePath;
                 
                 foreach (var c in InActivePygmentizeControls)
@@ -36,6 +43,7 @@ namespace pp_source_format
             }
             catch (Exception ex)
             {
+                // And here we disable / hide the operations that are not meaningful
                 foreach (var c in InActivePygmentizeControls)
                 {
                     c.Visible = true;
@@ -52,7 +60,10 @@ namespace pp_source_format
             }
         }
 
-        private void OnRenameSelected(object sender, RibbonControlEventArgs e)
+        /// <summary>
+        /// The user has decided to format some shapes
+        /// </summary>
+        private void OnFormatSelected(object sender, RibbonControlEventArgs e)
         {
             try
             {
@@ -68,26 +79,41 @@ namespace pp_source_format
             }
         }
 
+        /// <summary>
+        /// Shortcut to global Powerpoint object
+        /// </summary>
         private Application Application
         {
             get => Globals.SourceCodeFormatAddin.Application;
         }
 
+        /// <summary>
+        /// Shortcut to the active presentation
+        /// </summary>
         private Presentation ActivePresentation
         {
             get => Application.ActivePresentation;
         }
 
+        /// <summary>
+        /// Shortcut to the active Window
+        /// </summary>
         private DocumentWindow ActiveWindow
         {
             get => Application.ActiveWindow;
         }
 
+        /// <summary>
+        /// All controls that are meaningful if pygmentize was found
+        /// </summary>
         private IEnumerable<RibbonControl> ActivePygmentizeControls
         {
             get => new RibbonControl[] { lblPygmentsAvailable, btnFormatAll, btnFormatCurrent, cmbLanguage, };
         }
 
+        /// <summary>
+        /// All controls that are meaningful if pygmentize is missing
+        /// </summary>
         private IEnumerable<RibbonControl> InActivePygmentizeControls
         {
             get => new RibbonControl[] { lblPygmentsNotAvailable, btnHelpPygmentize };

@@ -11,15 +11,33 @@ using System.Windows.Forms;
 
 namespace pp_source_format
 {
+    /// <summary>
+    /// Encapsulates the heavy lifting of the formatting process. This boils down to the following steps:
+    /// 
+    /// 1) Prepare the source code by stripping or replacing some Powerpoint-specifics 
+    /// 2) Find out which binary to run to do the formatting and run it
+    /// 3) Convert the result to be in Win32 HTML Clipboard format which is digestible by Powerpoint
+    /// 4) Paste (!!) the snippet in the correct location. Yes, this uses the clipboard.
+    /// </summary>
     public static class Formatter
     {
+        // I miss Java enums with their own methods :( Extension methods dont quite cut it
+
+        /// <summary>
+        /// Output formats that seem to be sensible when pasting in to Powerpoint. The RTFs produced
+        /// by pygments worked fine when opening and pasting from Word but had various issues with
+        /// Powerpoint so I went for HTML.
+        /// </summary>
         enum Format
         {
             HTML,
             RTF,
         };
 
-        // I miss Java enums with their own methods :( Extension methods dont quite cut it
+        
+        /// <summary>
+        /// Format -> Powerpoint
+        /// </summary>
         static PpPasteDataType PowerpointPasteType(this Format f)
         {
             switch (f)
@@ -34,6 +52,9 @@ namespace pp_source_format
             }
         }
 
+        /// <summary>
+        /// Format -> Clipboard data format
+        /// </summary>
         static string DataFormat(this Format f)
         {
             switch (f)
@@ -48,6 +69,9 @@ namespace pp_source_format
             }
         }
 
+        /// <summary>
+        /// Format to pygments -f parameter
+        /// </summary>
         static string PygmentsFormat(this Format f)
         {
             switch (f)
@@ -62,6 +86,12 @@ namespace pp_source_format
             }
         }
 
+        /// <summary>
+        /// Exactly what it says on the tin.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="language"></param>
+        /// <param name="style"></param>
         public static void FormatShape(Shape s, string language, string style)
         {
             // Every paste option I tried had different issues, so I use this
@@ -254,9 +284,9 @@ namespace pp_source_format
             return result;
         }
 
-
-
-
+        /// <summary>
+        /// Didn't find a method in the standard library so I hacked my own.
+        /// </summary>
         private static string RemoveLastOccurrence(this string Source, string Find)
         {
             int place = Source.LastIndexOf(Find);
