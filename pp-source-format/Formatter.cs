@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,20 +13,118 @@ namespace pp_source_format
 {
     public static class Formatter
     {
+        enum Format
+        {
+            HTML,
+            RTF,
+        };
+
+        static PpPasteDataType PowerpointPasteType(this Format f)
+        {
+            switch (f)
+            {
+                case Format.HTML:
+                    return PpPasteDataType.ppPasteHTML;
+                case Format.RTF:
+                    return PpPasteDataType.ppPasteRTF;
+                default:
+                    throw new Exception("Unknown paste type");
+
+            }
+        }
+
+        static string DataFormat(this Format f)
+        {
+            switch (f)
+            {
+                case Format.HTML:
+                    return DataFormats.Html;
+                case Format.RTF:
+                    return DataFormats.Rtf;
+                default:
+                    throw new Exception("Unknown paste type");
+
+            }
+        }
+
+        static string PygmentsFormat(this Format f)
+        {
+            switch (f)
+            {
+                case Format.HTML:
+                    return "html";
+                case Format.RTF:
+                    return "rtf";
+                default:
+                    throw new Exception("Unknown paste type");
+
+            }
+        }
+
         public static void FormatShape(Shape s, string language, string style)
         {
+            // Every paste option I tried had different issues, so I use this
+            // switch to switch between them.
+            Format format = Format.HTML;
+
+            // The source code input string
             var sourceText = s.TextFrame.TextRange.Text;
+
+            // The original font is overridden by the pasting operation, so we remember it here
             var fontName = GuessSensibleFont(s.TextFrame.TextRange);
 
-            var formattedText = RunPygments(sourceText, language, style);
-            Clipboard.SetData(DataFormats.Text, formattedText);
-            Clipboard.SetData(DataFormats.Rtf, formattedText);
-            s.TextFrame.TextRange.PasteSpecial(PpPasteDataType.ppPasteRTF);
+            // Below this point `formattedText` describes a perfectly valid HTML or
+            // RTF document that is displayed just fine by any word processor or
+            // browser that I am aware of. But for whatever reason powerpoint
+            // badly chokes on the import.
+
+            bool multiPaste = false;
+            if (multiPaste)
+            {
+                DataObject d = new DataObject();
+                foreach (Format item in Enum.GetValues(typeof(Format)))
+                {
+                    var formattedText = RunPygments(item, sourceText, language, style);
+                    d.SetData(item.DataFormat(), formattedText);
+                }
+                Clipboard.SetDataObject(d);
+            }
+            else
+            {
+                // Actually run pygments and pipe it to the clipboard
+                var formattedText = RunPygments(format, sourceText, language, style);
+                Clipboard.SetData(format.DataFormat(), formattedText);
+
+                // Possibly try a hacky HTML -> RTF conversion?
+                // This seems to loose colour informarmation
+                if (false && format == Format.HTML)
+                {
+                    formattedText = HtmlToRtf(formattedText);
+                    format = Format.RTF;
+                    Clipboard.SetData(format.DataFormat(), formattedText);
+                }
+            }
+
+            // This seems to be the sensible way to paste into Powerpoint
+            // But for whatever reason it leeds to "bleeding" of colours once
+            // the color should reset to black
+            s.TextFrame.TextRange.PasteSpecial(format.PowerpointPasteType());
+
+            // An alternative way to paste,
+            // inspired by https://stackoverflow.com/questions/33493983/vsto-powerpoint-notes-page-different-colored-words-on-same-line/43210187#43210187
+            //s.Select();
+            //Globals.SourceCodeFormatAddin.Application.CommandBars.ExecuteMso("PasteSourceFormatting");
+            //System.Windows.Forms.Application.DoEvents();
 
             // Pasting has removed the font
             s.TextFrame.TextRange.Font.Name = fontName;
         }
 
+        /// <summary>
+        /// Best effort guess to keep the existing font.
+        /// </summary>
+        /// <param name="t">Sample text range</param>
+        /// <returns>A sensible font</returns>
         private static string GuessSensibleFont(TextRange t)
         {
             if (!String.IsNullOrEmpty(t.Font.Name))
@@ -35,7 +134,8 @@ namespace pp_source_format
 
             foreach (TextRange c in t.Characters())
             {
-                if (!String.IsNullOrEmpty(c.Font.Name)) {
+                if (!String.IsNullOrEmpty(c.Font.Name))
+                {
                     return c.Font.Name;
                 }
             }
@@ -43,13 +143,40 @@ namespace pp_source_format
             return "Consolas";
         }
 
-        private static string RunPygments(string input, string language, string style)
+        /// <summary>
+        /// Starts an external pygments process and collects the results.
+        /// </summary>
+        /// <param name="format">The output format to use</param>
+        /// <param name="input">The code to format</param>
+        /// <param name="language">The programming language to use</param>
+        /// <param name="style">The style to use</param>
+        /// <returns>A highlighted document, format according to the parameter</returns>
+        private static string RunPygments(Format format, string input, string language, string style)
         {
-            var arguments = String.Format("-f rtf -l \"{0}\" -O \"style={1}\"", language, style);
-            if (false )
+            var filePath = Path.Combine(Path.GetTempPath(), "pp-format.html");
+
+            var options = new List<string>(new string[] {
+                "style=" + style,
+            });
+            if (format == Format.HTML)
             {
-                arguments += "-o \"C:/Users/Marcus Riemer/source/repos/MarcusRiemer/powerpoint-source-code-format/pp-source-format/test.rtf\"";
+                options.AddRange(new string[] {
+                    "noclasses=true",
+                    "nowrap=true",
+                    //"full=true",
+                    "lineseparator=<br>",
+                });
             }
+
+
+            var allArguments = new List<string>(new string[] {
+                "-o " + '"' + filePath + '"',
+                "-f " + format.PygmentsFormat(),
+                "-l " + language,
+                "-O " + '"' + string.Join(",", options.ToArray()) + '"'
+            });
+
+            var arguments = String.Join(" ", allArguments.ToArray());
             var startInfo = new ProcessStartInfo()
             {
                 FileName = FindPygmentizePath(),
@@ -72,14 +199,76 @@ namespace pp_source_format
 
             p.WaitForExit();
 
-            var result = p.StandardOutput.ReadToEnd();
-            var error = p.StandardError.ReadToEnd();
 
+            var error = p.StandardError.ReadToEnd();
             if (!String.IsNullOrWhiteSpace(error))
             {
-                throw new Exception(String.Format("Error running pygmentize with arguments {0}:\n{1}", arguments, error));
-            } 
+                throw new Exception(String.Format("Temp file at {0}, Error running pygmentize with arguments {0}:\n{1}", filePath, arguments, error));
+            }
+
+            // var result = p.StandardOutput.ReadToEnd();
+            var result = File.ReadAllText(filePath);
+
+            if (format == Format.HTML)
+            {
+                // Wrap the result in a valid, minimal document with the Fragments as required by the HTML Clipboard format
+                // https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa767917(v=vs.85)
+                result = "<html><body>" + ClipboardHelper.StartFragment + "<pre>" + result + "</pre>" + ClipboardHelper.EndFragment + "</body></html>";
+
+                // Whitespace at the beginning of lines seems to be collapsed, sadly neither of the
+                // tricks at https://stackoverflow.com/questions/47475774/how-to-add-spaces-to-html-clipboard-data-so-that-winword-inserts-them-on-pasting
+                // worked for me
+                //result = result.Replace("<span style=\"", "<span style=\"white-space: pre;");
+
+                // Remove last newline, that line is useless for MS Word
+                result = result.RemoveLastOccurrence("<br>");
+
+                // Okay, this is the most nasty part ... We insert &nbsp; after each linebreak to preserve
+                // whitespace formatting. Each whitespace must be replaced by a single non breaking space.
+                result = Regex.Replace(result, "(<br> *)", delegate (Match m) { return m.Value.Replace(" ", "&nbsp;"); });
+
+                File.WriteAllText(filePath, result);
+
+
+                result = ClipboardHelper.GetHtmlDataString(result);
+            }
+
+
             return result;
+        }
+
+
+
+
+        private static string RemoveLastOccurrence(this string Source, string Find)
+        {
+            int place = Source.LastIndexOf(Find);
+
+            if (place == -1)
+                return Source;
+            else
+                return Source.Remove(place, Find.Length);
+        }
+
+        /// <summary>
+        /// Marvelous hack as proposed at https://stackoverflow.com/questions/33493983/
+        /// Sadly it seems to loose all colour information.
+        /// </summary>
+        /// <param name="toPaste"></param>
+        /// <returns></returns>
+        private static string HtmlToRtf(string toPaste)
+        {
+            var web = new WebBrowser();
+            web.CreateControl();
+            web.DocumentText = toPaste;
+            while (web.DocumentText != toPaste)
+            {
+                System.Windows.Forms.Application.DoEvents();
+            }
+            web.Document.ExecCommand("SelectAll", false, null);
+            web.Document.ExecCommand("Copy", false, null);
+            //web.Dispose();
+            return Clipboard.GetData(DataFormats.Rtf) as string;
         }
 
         public static string FindPygmentizePath()
