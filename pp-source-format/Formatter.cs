@@ -94,61 +94,72 @@ namespace pp_source_format
         /// <param name="style"></param>
         public static void FormatShape(Shape s, string language, string style)
         {
-            // Every paste option I tried had different issues, so I use this
-            // switch to switch between them.
-            Format format = Format.HTML;
+            // Remember the old state of the clipboard to restore it after we used it as
+            // a way to interface with Powerpoint.
+            var previousClipboard = Clipboard.GetDataObject();
 
-            // The source code input string
-            var sourceText = s.TextFrame.TextRange.Text;
-
-            // The original font is overridden by the pasting operation, so we remember it here
-            var fontName = GuessSensibleFont(s.TextFrame.TextRange);
-
-            // Below this point `formattedText` describes a perfectly valid HTML or
-            // RTF document that is displayed just fine by any word processor or
-            // browser that I am aware of. But for whatever reason powerpoint
-            // badly chokes on the import.
-
-            bool multiPaste = false;
-            if (multiPaste)
+            try
             {
-                DataObject d = new DataObject();
-                foreach (Format item in Enum.GetValues(typeof(Format)))
+
+                // Every paste option I tried had different issues, so I use this
+                // switch to switch between them.
+                Format format = Format.HTML;
+
+                // The source code input string
+                var sourceText = s.TextFrame.TextRange.Text;
+
+                // The original font is overridden by the pasting operation, so we remember it here
+                var fontName = GuessSensibleFont(s.TextFrame.TextRange);
+
+                // Below this point `formattedText` describes a perfectly valid HTML or
+                // RTF document that is displayed just fine by any word processor or
+                // browser that I am aware of. But for whatever reason powerpoint
+                // badly chokes on the import.
+
+                bool multiPaste = false;
+                if (multiPaste)
                 {
-                    var formattedText = RunPygments(item, sourceText, language, style);
-                    d.SetData(item.DataFormat(), formattedText);
+                    DataObject d = new DataObject();
+                    foreach (Format item in Enum.GetValues(typeof(Format)))
+                    {
+                        var formattedText = RunPygments(item, sourceText, language, style);
+                        d.SetData(item.DataFormat(), formattedText);
+                    }
+                    Clipboard.SetDataObject(d);
                 }
-                Clipboard.SetDataObject(d);
-            }
-            else
-            {
-                // Actually run pygments and pipe it to the clipboard
-                var formattedText = RunPygments(format, sourceText, language, style);
-                Clipboard.SetData(format.DataFormat(), formattedText);
-
-                // Possibly try a hacky HTML -> RTF conversion?
-                // This seems to loose colour informarmation
-                if (false && format == Format.HTML)
+                else
                 {
-                    formattedText = HtmlToRtf(formattedText);
-                    format = Format.RTF;
+                    // Actually run pygments and pipe it to the clipboard
+                    var formattedText = RunPygments(format, sourceText, language, style);
                     Clipboard.SetData(format.DataFormat(), formattedText);
+
+                    // Possibly try a hacky HTML -> RTF conversion?
+                    // This seems to loose colour informarmation
+                    if (false && format == Format.HTML)
+                    {
+                        formattedText = HtmlToRtf(formattedText);
+                        format = Format.RTF;
+                        Clipboard.SetData(format.DataFormat(), formattedText);
+                    }
                 }
+
+                // This seems to be the sensible way to paste into Powerpoint
+                // But for whatever reason it leeds to "bleeding" of colours once
+                // the color should reset to black
+                s.TextFrame.TextRange.PasteSpecial(format.PowerpointPasteType());
+
+                // An alternative way to paste,
+                // inspired by https://stackoverflow.com/questions/33493983/vsto-powerpoint-notes-page-different-colored-words-on-same-line/43210187#43210187
+                //s.Select();
+                //Globals.SourceCodeFormatAddin.Application.CommandBars.ExecuteMso("PasteSourceFormatting");
+                //System.Windows.Forms.Application.DoEvents();
+
+                // Pasting has removed the font
+                s.TextFrame.TextRange.Font.Name = fontName;
+            } finally
+            {
+                Clipboard.SetDataObject(previousClipboard);
             }
-
-            // This seems to be the sensible way to paste into Powerpoint
-            // But for whatever reason it leeds to "bleeding" of colours once
-            // the color should reset to black
-            s.TextFrame.TextRange.PasteSpecial(format.PowerpointPasteType());
-
-            // An alternative way to paste,
-            // inspired by https://stackoverflow.com/questions/33493983/vsto-powerpoint-notes-page-different-colored-words-on-same-line/43210187#43210187
-            //s.Select();
-            //Globals.SourceCodeFormatAddin.Application.CommandBars.ExecuteMso("PasteSourceFormatting");
-            //System.Windows.Forms.Application.DoEvents();
-
-            // Pasting has removed the font
-            s.TextFrame.TextRange.Font.Name = fontName;
         }
 
         /// <summary>
