@@ -3,9 +3,20 @@
 Dealing with source code in Powerpoint is cumbersome. Pasting the sourcecode works for certain applications
 that fill the clipboard with RTF or HTML data, but keeping all sorts of snippets up to date is cumbersome. 
 This plugin adds ribbon UI elements which run [pygments](https://pygments.org/) to apply syntax highlighting 
-to selected texts or shapes.
+to selected text-shapes.
 
+![GIF-Video that shows the plugin in action](https://playground.marcusriemer.de/pp_source_code.gif)
 
+# Hacky work-in-progress warning: This may destroy the formatted sources!
+
+I have only tested this Plugin with a few of my slides and during development I stumbled over all sorts of
+hacks that I needed to employ to achieve the seemingly stable formatting that you can see in the video.
+During development I had to replace spaces with non breaking space (and vice versa), learned about the 
+`\v` escape sequence that Powerpoint seems to use internally for line breaks that are not paragraphs,
+dug through the annoyances of the [Win32 HTML clipboard format](https://docs.microsoft.com/en-us/windows/win32/dataxchg/html-clipboard-format)
+and possibly some more things.
+
+That being said: <kbd>Ctrl</kbd> + <kbd>Z</kbd> should work if something goes wrong.
 
 # How to install Pygments
 

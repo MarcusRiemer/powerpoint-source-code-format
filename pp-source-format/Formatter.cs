@@ -19,6 +19,7 @@ namespace pp_source_format
             RTF,
         };
 
+        // I miss Java enums with their own methods :( Extension methods dont quite cut it
         static PpPasteDataType PowerpointPasteType(this Format f)
         {
             switch (f)
@@ -28,7 +29,7 @@ namespace pp_source_format
                 case Format.RTF:
                     return PpPasteDataType.ppPasteRTF;
                 default:
-                    throw new Exception("Unknown paste type");
+                    throw new Exception("Unknown paste type: " + f.ToString());
 
             }
         }
@@ -42,7 +43,7 @@ namespace pp_source_format
                 case Format.RTF:
                     return DataFormats.Rtf;
                 default:
-                    throw new Exception("Unknown paste type");
+                    throw new Exception("Unknown data format: " + f.ToString());
 
             }
         }
@@ -56,7 +57,7 @@ namespace pp_source_format
                 case Format.RTF:
                     return "rtf";
                 default:
-                    throw new Exception("Unknown paste type");
+                    throw new Exception("Unknown pygments format: " + f.ToString());
 
             }
         }
@@ -153,7 +154,9 @@ namespace pp_source_format
         /// <returns>A highlighted document, format according to the parameter</returns>
         private static string RunPygments(Format format, string input, string language, string style)
         {
-            var filePath = Path.Combine(Path.GetTempPath(), "pp-format.html");
+            // For debug purposes it may come in handy to see the actual results in file form
+            var filePath = Path.Combine(Path.GetTempPath(), "pp-format." + format.PygmentsFormat());
+            bool useFilePath = false;
 
             var options = new List<string>(new string[] {
                 "style=" + style,
@@ -170,11 +173,15 @@ namespace pp_source_format
 
 
             var allArguments = new List<string>(new string[] {
-                "-o " + '"' + filePath + '"',
                 "-f " + format.PygmentsFormat(),
                 "-l " + language,
                 "-O " + '"' + string.Join(",", options.ToArray()) + '"'
             });
+
+            if (useFilePath)
+            {
+                allArguments.Insert(0, "-o " + '"' + filePath + '"');
+            }
 
             var arguments = String.Join(" ", allArguments.ToArray());
             var startInfo = new ProcessStartInfo()
@@ -187,6 +194,12 @@ namespace pp_source_format
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
             };
+
+            // The highlighting and powerpoint might do some bad things to the
+            // pre-formatted input. So we reverse some of these issues:
+            // * Swap "not quite breaks" that powerpoint uses for "proper" breaks (no, \n doesnt work)
+            // * Swap all non breaking spaces for normal spaces
+            input = input.Replace("\v", "\r").Replace("\u00A0", " ");
 
             Process p = new Process()
             {
@@ -206,8 +219,7 @@ namespace pp_source_format
                 throw new Exception(String.Format("Temp file at {0}, Error running pygmentize with arguments {0}:\n{1}", filePath, arguments, error));
             }
 
-            // var result = p.StandardOutput.ReadToEnd();
-            var result = File.ReadAllText(filePath);
+            var result = useFilePath ? File.ReadAllText(filePath) : p.StandardOutput.ReadToEnd();
 
             if (format == Format.HTML)
             {
@@ -225,9 +237,14 @@ namespace pp_source_format
 
                 // Okay, this is the most nasty part ... We insert &nbsp; after each linebreak to preserve
                 // whitespace formatting. Each whitespace must be replaced by a single non breaking space.
-                result = Regex.Replace(result, "(<br> *)", delegate (Match m) { return m.Value.Replace(" ", "&nbsp;"); });
+                result = Regex.Replace(result, "(<br> *)", delegate (Match m) { 
+                    return m.Value.Replace(" ", "&nbsp;"); 
+                });
 
-                File.WriteAllText(filePath, result);
+                if (useFilePath)
+                {
+                    File.WriteAllText(filePath, result);
+                }
 
 
                 result = ClipboardHelper.GetHtmlDataString(result);
