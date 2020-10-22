@@ -26,13 +26,36 @@
     <NoStandardLibraries>false</NoStandardLibraries>
     <RootNamespace>pp_source_format</RootNamespace>
     <AssemblyName>pp-source-format</AssemblyName>
-    <LoadBehavior>3</LoadBehavior>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <DefineConstants>VSTO40</DefineConstants>
+    <IsWebBootstrapper>False</IsWebBootstrapper>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <BootstrapperComponentsLocation>HomeSite</BootstrapperComponentsLocation>
+    <PublishUrl>publish\</PublishUrl>
+    <InstallUrl />
+    <TargetCulture>en</TargetCulture>
+    <ApplicationVersion>0.1.0.1</ApplicationVersion>
+    <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>days</UpdateIntervalUnits>
+    <ProductName>Powerpoint Source Code Formatter</ProductName>
+    <PublisherName>Marcus Riemer</PublisherName>
+    <SupportUrl>https://github.com/MarcusRiemer/powerpoint-source-code-format</SupportUrl>
+    <FriendlyName>Powerpoint Source Code Formatter</FriendlyName>
+    <OfficeApplicationDescription>Provides formatting for source code snippets embedded into Powerpoint</OfficeApplicationDescription>
+    <LoadBehavior>3</LoadBehavior>
   </PropertyGroup>
   <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.VSTORuntime.4.0">
       <Visible>False</Visible>
       <ProductName>Microsoft Visual Studio 2010 Tools for Office Runtime %28x86 and x64%29</ProductName>
@@ -171,6 +194,7 @@
     <EmbeddedResource Include="Ribbon.resx">
       <DependentUpon>Ribbon.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="pp-source-format_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -179,6 +203,7 @@
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Ribbon.cs">
       <SubType>Component</SubType>
@@ -228,8 +253,8 @@
     <VisualStudio>
       <FlavorProperties GUID="{BAA0C2D2-18E2-41B9-852F-F413020CAA33}">
         <ProjectProperties HostName="PowerPoint" HostPackage="{29A7B9D7-A7F1-4328-8EF0-6B2D1A56B2C1}" OfficeVersion="15.0" VstxVersion="4.0" ApplicationType="PowerPoint" Language="cs" TemplatesPath="" DebugInfoExeName="#Software\Microsoft\Office\16.0\PowerPoint\InstallRoot\Path#powerpnt.exe" AddItemTemplatesGuid="{51063C3A-E220-4D12-8922-BDA915ACD783}" />
-        <Host Name="PowerPoint" GeneratedCodeNamespace="pp_source_format" IconIndex="0">
-          <HostItem Name="ThisAddIn" Code="SourceCodeFormatAddin.cs" CanonicalName="AddIn" CanActivate="false" IconIndex="1" Blueprint="SourceCodeFormatAddin.Designer.xml" GeneratedCode="SourceCodeFormatAddin.Designer.cs" />
+        <Host Name="PowerPoint" GeneratedCodeNamespace="pp_source_format" PublishedHash="69C324AB27932AA2FBF2B7EA72250886FF164DE6" IconIndex="0">
+          <HostItem Name="ThisAddIn" Code="SourceCodeFormatAddin.cs" CanonicalName="AddIn" PublishedHash="5378D6D88AA357EDDB9933678C48937E38E4298C" CanActivate="false" IconIndex="1" Blueprint="SourceCodeFormatAddin.Designer.xml" GeneratedCode="SourceCodeFormatAddin.Designer.cs" />
         </Host>
       </FlavorProperties>
     </VisualStudio>

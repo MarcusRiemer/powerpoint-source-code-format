@@ -9,8 +9,10 @@ namespace pp_source_format
 {
     public partial class Ribbon
     {
-        private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
+        private void RibbonLoad(object sender, RibbonUIEventArgs e)
         {
+            cmbLanguage.Text = CurrentSettings.SelectedLanguage;
+            cmbStyle.Text = CurrentSettings.SelectedStyle;
             ReflectPygmentizeStatus();
         }
 
@@ -118,5 +120,32 @@ namespace pp_source_format
         {
             get => new RibbonControl[] { lblPygmentsNotAvailable, btnHelpPygmentize };
         }
+
+        /// <summary>
+        /// The user has decided to use a different language, we want to remember this
+        /// </summary>
+        private void OnLanguageChanged(object sender, RibbonControlEventArgs e)
+        {
+            CurrentSettings.SelectedLanguage = cmbLanguage.Text;
+            CurrentSettings.Save();
+        }
+
+        /// <summary>
+        /// The user has decided to use a different style, we want to remember this
+        /// </summary>
+        private void OnStyleChanged(object sender, RibbonControlEventArgs e)
+        {
+            CurrentSettings.SelectedStyle = cmbStyle.Text;
+            CurrentSettings.Save();
+        }
+
+        /// <summary>
+        /// The settings that should be applicable to the current user
+        /// </summary>
+        private Properties.Settings CurrentSettings {
+            get => Properties.Settings.Default;
+        }
+
+        
     }
 }

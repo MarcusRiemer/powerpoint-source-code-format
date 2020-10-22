@@ -43,10 +43,10 @@
             this.lblPygmentsAvailable = this.Factory.CreateRibbonLabel();
             this.lblPygmentsNotAvailable = this.Factory.CreateRibbonLabel();
             this.cmbLanguage = this.Factory.CreateRibbonComboBox();
+            this.cmbStyle = this.Factory.CreateRibbonComboBox();
             this.btnHelpPygmentize = this.Factory.CreateRibbonButton();
             this.btnFormatCurrent = this.Factory.CreateRibbonButton();
             this.btnFormatAll = this.Factory.CreateRibbonButton();
-            this.cmbStyle = this.Factory.CreateRibbonComboBox();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.SuspendLayout();
@@ -91,6 +91,18 @@
             this.cmbLanguage.Label = "Language";
             this.cmbLanguage.Name = "cmbLanguage";
             this.cmbLanguage.Text = "java";
+            this.cmbLanguage.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.OnLanguageChanged);
+            // 
+            // cmbStyle
+            // 
+            ribbonDropDownItemImpl3.Label = "default";
+            ribbonDropDownItemImpl4.Label = "vs";
+            this.cmbStyle.Items.Add(ribbonDropDownItemImpl3);
+            this.cmbStyle.Items.Add(ribbonDropDownItemImpl4);
+            this.cmbStyle.Label = "Style";
+            this.cmbStyle.Name = "cmbStyle";
+            this.cmbStyle.Text = "default";
+            this.cmbStyle.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.OnStyleChanged);
             // 
             // btnHelpPygmentize
             // 
@@ -115,22 +127,12 @@
             this.btnFormatAll.ShowImage = true;
             this.btnFormatAll.Visible = false;
             // 
-            // cmbStyle
-            // 
-            ribbonDropDownItemImpl3.Label = "default";
-            ribbonDropDownItemImpl4.Label = "vs";
-            this.cmbStyle.Items.Add(ribbonDropDownItemImpl3);
-            this.cmbStyle.Items.Add(ribbonDropDownItemImpl4);
-            this.cmbStyle.Label = "Style";
-            this.cmbStyle.Name = "cmbStyle";
-            this.cmbStyle.Text = "default";
-            // 
             // Ribbon
             // 
             this.Name = "Ribbon";
             this.RibbonType = "Microsoft.PowerPoint.Presentation";
             this.Tabs.Add(this.tab1);
-            this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.Ribbon1_Load);
+            this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.RibbonLoad);
             this.tab1.ResumeLayout(false);
             this.tab1.PerformLayout();
             this.group1.ResumeLayout(false);
