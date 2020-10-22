@@ -34,7 +34,7 @@ namespace pp_source_format
             RTF,
         };
 
-        
+
         /// <summary>
         /// Format -> Powerpoint
         /// </summary>
@@ -156,9 +156,10 @@ namespace pp_source_format
 
                 // Pasting has removed the font
                 s.TextFrame.TextRange.Font.Name = fontName;
-            } finally
+            }
+            finally
             {
-                Clipboard.SetDataObject(previousClipboard);
+                //Clipboard.SetDataObject(previousClipboard);
             }
         }
 
@@ -227,7 +228,7 @@ namespace pp_source_format
             var arguments = String.Join(" ", allArguments.ToArray());
             var startInfo = new ProcessStartInfo()
             {
-                FileName = FindPygmentizePath(),
+                FileName = Pygments.PygmentizePath,
                 Arguments = arguments,
                 UseShellExecute = false,
                 RedirectStandardInput = true,
@@ -278,8 +279,9 @@ namespace pp_source_format
 
                 // Okay, this is the most nasty part ... We insert &nbsp; after each linebreak to preserve
                 // whitespace formatting. Each whitespace must be replaced by a single non breaking space.
-                result = Regex.Replace(result, "(<br> *)", delegate (Match m) { 
-                    return m.Value.Replace(" ", "&nbsp;"); 
+                result = Regex.Replace(result, "(<br> *)", delegate (Match m)
+                {
+                    return m.Value.Replace(" ", "&nbsp;");
                 });
 
                 if (useFilePath)
@@ -327,51 +329,6 @@ namespace pp_source_format
             web.Document.ExecCommand("Copy", false, null);
             //web.Dispose();
             return Clipboard.GetData(DataFormats.Rtf) as string;
-        }
-
-        public static string FindPygmentizePath()
-        {
-            return FindExePath("pygmentize.exe");
-        }
-
-        private static string FindPygmentizeFromPythonPath()
-        {
-            var pythonExe = FindExePath("python.exe");
-            var pythonDir = Path.GetDirectoryName(pythonExe);
-            var pygmentsExe = Path.Combine(pythonDir, "Scripts", "pygmentize.exe");
-
-            if (!File.Exists(pygmentsExe))
-            {
-                throw new FileNotFoundException(String.Format("Pygments formatter could not be found: {0}", pygmentsExe));
-            }
-
-            return Path.GetFullPath(pygmentsExe);
-        }
-
-        /// <summary>
-        /// Expands environment variables and, if unqualified, locates the exe in the working directory
-        /// or the evironment's path.
-        /// </summary>
-        /// <param name="exe">The name of the executable file</param>
-        /// <returns>The fully-qualified path to the file</returns>
-        /// <exception cref="System.IO.FileNotFoundException">Raised when the exe was not found</exception>
-        private static string FindExePath(string exe)
-        {
-            exe = Environment.ExpandEnvironmentVariables(exe);
-            if (!File.Exists(exe))
-            {
-                if (Path.GetDirectoryName(exe) == String.Empty)
-                {
-                    foreach (string test in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';'))
-                    {
-                        string path = test.Trim();
-                        if (!String.IsNullOrEmpty(path) && File.Exists(path = Path.Combine(path, exe)))
-                            return Path.GetFullPath(path);
-                    }
-                }
-                throw new FileNotFoundException(new FileNotFoundException().Message, exe);
-            }
-            return Path.GetFullPath(exe);
         }
     }
 }

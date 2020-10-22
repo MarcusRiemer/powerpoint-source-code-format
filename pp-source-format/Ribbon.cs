@@ -22,43 +22,17 @@ namespace pp_source_format
         /// </summary>
         private void ReflectPygmentizeStatus()
         {
-            try
+            if (Pygments.FoundPygmentize)
             {
-                // This will throw if pygmentize is not available
-                var PygmentizePath = Formatter.FindPygmentizePath();
+                lblPygmentsAvailable.SuperTip = Pygments.PygmentizePath;
 
-                // So here we are on the success path
-                lblPygmentsAvailable.SuperTip = PygmentizePath;
-                
-                foreach (var c in InActivePygmentizeControls)
-                {
-                    c.Visible = false;
-                }
-
-                foreach (var c in ActivePygmentizeControls)
-                {
-                    c.Enabled = true;
-                }
-
-                lblPygmentsAvailable.Visible = true;
-                lblPygmentsNotAvailable.Visible = false;
+                SetBoxVisible(bxAvailable, true);
+                SetBoxVisible(bxUnavailable, false);
             }
-            catch (Exception ex)
+            else
             {
-                // And here we disable / hide the operations that are not meaningful
-                foreach (var c in InActivePygmentizeControls)
-                {
-                    c.Visible = true;
-                }
-
-                foreach (var c in ActivePygmentizeControls)
-                {
-                    c.Enabled = false;
-                }
-
-
-                lblPygmentsAvailable.Visible = false;
-                lblPygmentsNotAvailable.Visible = true;
+                SetBoxVisible(bxAvailable, false);
+                SetBoxVisible(bxUnavailable, true);
             }
         }
 
@@ -105,20 +79,22 @@ namespace pp_source_format
             get => Application.ActiveWindow;
         }
 
-        /// <summary>
-        /// All controls that are meaningful if pygmentize was found
-        /// </summary>
-        private IEnumerable<RibbonControl> ActivePygmentizeControls
+        private static void SetBoxEnabled(RibbonBox box, bool enabled)
         {
-            get => new RibbonControl[] { lblPygmentsAvailable, btnFormatAll, btnFormatCurrent, cmbLanguage, };
+            box.Enabled = enabled;
+            foreach (var item in box.Items)
+            {
+                item.Enabled = enabled;
+            }
         }
 
-        /// <summary>
-        /// All controls that are meaningful if pygmentize is missing
-        /// </summary>
-        private IEnumerable<RibbonControl> InActivePygmentizeControls
+        private static void SetBoxVisible(RibbonBox box, bool visible)
         {
-            get => new RibbonControl[] { lblPygmentsNotAvailable, btnHelpPygmentize };
+            box.Visible = visible;
+            foreach (var item in box.Items)
+            {
+                item.Visible = visible;
+            }
         }
 
         /// <summary>
@@ -140,12 +116,20 @@ namespace pp_source_format
         }
 
         /// <summary>
+        /// The user has some trouble setting up pygments, lets show him where he can get help
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnShowOnlineHelp(object sender, RibbonControlEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/MarcusRiemer/powerpoint-source-code-format");
+        }
+
+        /// <summary>
         /// The settings that should be applicable to the current user
         /// </summary>
         private Properties.Settings CurrentSettings {
             get => Properties.Settings.Default;
         }
-
-        
     }
 }

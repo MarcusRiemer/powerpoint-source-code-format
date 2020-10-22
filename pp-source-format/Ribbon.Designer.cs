@@ -40,15 +40,18 @@
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl4 = this.Factory.CreateRibbonDropDownItem();
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
-            this.lblPygmentsAvailable = this.Factory.CreateRibbonLabel();
+            this.bxUnavailable = this.Factory.CreateRibbonBox();
             this.lblPygmentsNotAvailable = this.Factory.CreateRibbonLabel();
+            this.btnHelpPygmentize = this.Factory.CreateRibbonButton();
+            this.bxAvailable = this.Factory.CreateRibbonBox();
+            this.lblPygmentsAvailable = this.Factory.CreateRibbonLabel();
             this.cmbLanguage = this.Factory.CreateRibbonComboBox();
             this.cmbStyle = this.Factory.CreateRibbonComboBox();
-            this.btnHelpPygmentize = this.Factory.CreateRibbonButton();
             this.btnFormatCurrent = this.Factory.CreateRibbonButton();
-            this.btnFormatAll = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
+            this.bxUnavailable.SuspendLayout();
+            this.bxAvailable.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab1
@@ -60,27 +63,42 @@
             // 
             // group1
             // 
-            this.group1.Items.Add(this.lblPygmentsAvailable);
-            this.group1.Items.Add(this.lblPygmentsNotAvailable);
-            this.group1.Items.Add(this.btnHelpPygmentize);
-            this.group1.Items.Add(this.cmbLanguage);
-            this.group1.Items.Add(this.cmbStyle);
-            this.group1.Items.Add(this.btnFormatCurrent);
-            this.group1.Items.Add(this.btnFormatAll);
+            this.group1.Items.Add(this.bxUnavailable);
+            this.group1.Items.Add(this.bxAvailable);
             this.group1.Label = "PP Source Code";
             this.group1.Name = "group1";
             // 
-            // lblPygmentsAvailable
+            // bxUnavailable
             // 
-            this.lblPygmentsAvailable.Label = "✓ Pygments is available";
-            this.lblPygmentsAvailable.Name = "lblPygmentsAvailable";
-            this.lblPygmentsAvailable.Visible = false;
+            this.bxUnavailable.BoxStyle = Microsoft.Office.Tools.Ribbon.RibbonBoxStyle.Vertical;
+            this.bxUnavailable.Items.Add(this.lblPygmentsNotAvailable);
+            this.bxUnavailable.Items.Add(this.btnHelpPygmentize);
+            this.bxUnavailable.Name = "bxUnavailable";
             // 
             // lblPygmentsNotAvailable
             // 
             this.lblPygmentsNotAvailable.Label = "❌ Pygments is not available";
             this.lblPygmentsNotAvailable.Name = "lblPygmentsNotAvailable";
-            this.lblPygmentsNotAvailable.Visible = false;
+            // 
+            // btnHelpPygmentize
+            // 
+            this.btnHelpPygmentize.Label = "Show Online Help";
+            this.btnHelpPygmentize.Name = "btnHelpPygmentize";
+            this.btnHelpPygmentize.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.OnShowOnlineHelp);
+            // 
+            // bxAvailable
+            // 
+            this.bxAvailable.BoxStyle = Microsoft.Office.Tools.Ribbon.RibbonBoxStyle.Vertical;
+            this.bxAvailable.Items.Add(this.lblPygmentsAvailable);
+            this.bxAvailable.Items.Add(this.cmbLanguage);
+            this.bxAvailable.Items.Add(this.cmbStyle);
+            this.bxAvailable.Items.Add(this.btnFormatCurrent);
+            this.bxAvailable.Name = "bxAvailable";
+            // 
+            // lblPygmentsAvailable
+            // 
+            this.lblPygmentsAvailable.Label = "✓ Pygments is available";
+            this.lblPygmentsAvailable.Name = "lblPygmentsAvailable";
             // 
             // cmbLanguage
             // 
@@ -104,11 +122,6 @@
             this.cmbStyle.Text = "default";
             this.cmbStyle.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.OnStyleChanged);
             // 
-            // btnHelpPygmentize
-            // 
-            this.btnHelpPygmentize.Label = "Show Online Help";
-            this.btnHelpPygmentize.Name = "btnHelpPygmentize";
-            // 
             // btnFormatCurrent
             // 
             this.btnFormatCurrent.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -117,15 +130,6 @@
             this.btnFormatCurrent.Name = "btnFormatCurrent";
             this.btnFormatCurrent.ShowImage = true;
             this.btnFormatCurrent.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.OnFormatSelected);
-            // 
-            // btnFormatAll
-            // 
-            this.btnFormatAll.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.btnFormatAll.Image = global::pp_source_format.Properties.Resources.multiple_targets;
-            this.btnFormatAll.Label = "Format All";
-            this.btnFormatAll.Name = "btnFormatAll";
-            this.btnFormatAll.ShowImage = true;
-            this.btnFormatAll.Visible = false;
             // 
             // Ribbon
             // 
@@ -137,6 +141,10 @@
             this.tab1.PerformLayout();
             this.group1.ResumeLayout(false);
             this.group1.PerformLayout();
+            this.bxUnavailable.ResumeLayout(false);
+            this.bxUnavailable.PerformLayout();
+            this.bxAvailable.ResumeLayout(false);
+            this.bxAvailable.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -146,12 +154,13 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnFormatCurrent;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnFormatAll;
         internal Microsoft.Office.Tools.Ribbon.RibbonComboBox cmbLanguage;
         internal Microsoft.Office.Tools.Ribbon.RibbonLabel lblPygmentsAvailable;
         internal Microsoft.Office.Tools.Ribbon.RibbonLabel lblPygmentsNotAvailable;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnHelpPygmentize;
         internal Microsoft.Office.Tools.Ribbon.RibbonComboBox cmbStyle;
+        internal Microsoft.Office.Tools.Ribbon.RibbonBox bxUnavailable;
+        internal Microsoft.Office.Tools.Ribbon.RibbonBox bxAvailable;
     }
 
     partial class ThisRibbonCollection
